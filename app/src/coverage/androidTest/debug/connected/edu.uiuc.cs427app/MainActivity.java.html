@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">edu.uiuc.cs427app</a> &gt; <span class="el_source">MainActivity.java</span></div><h1>MainActivity.java</h1><pre class="source lang-java linenums">package edu.uiuc.cs427app;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.ui.AppBarConfiguration;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import edu.uiuc.cs427app.databinding.ActivityMainBinding;
+
+<span class="fc" id="L25">public class MainActivity extends AppCompatActivity {</span>
+    private static final String DEFAULT_SPINNER_MESSAGE = &quot;Pick location&quot;;
+
+   private AppBarConfiguration appBarConfiguration;
+    private ActivityMainBinding binding;
+    private Spinner locationSpinner;
+    private Button saveButton;
+    private DatabaseHelper databaseHelper;
+    private List&lt;String&gt; userLocations;
+    public static final String SHARED_PREFS = &quot;shared_prefs&quot;;
+    SharedPreferences sharedpreferences;
+<span class="fc" id="L36">    String userId = null;</span>
+
+
+    // Enum to indicate the current action (add or delete a location)
+<span class="fc" id="L40">    enum CurrentAction {</span>
+<span class="fc" id="L41">        add, delete</span>
+    }
+
+    // Used to indicate whether a user is adding or deleting a location from the database
+<span class="fc" id="L45">    private CurrentAction currAction = MainActivity.CurrentAction.add;</span>
+
+    /**
+     * Initializes the activity, sets up the UI, and binds listeners.
+     *
+     * @param savedInstanceState Previous state data (if any).
+     */
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L54">        super.onCreate(savedInstanceState);</span>
+        // Get theme preference from saved data
+<span class="fc" id="L56">        sharedpreferences = getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);</span>
+<span class="fc" id="L57">        String userTheme = sharedpreferences.getString(&quot;userTheme&quot;, &quot;defaultTheme&quot;);</span>
+
+        // Change theme according to user choice
+
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (&quot;Dark&quot;.equals(userTheme)) {</span>
+<span class="fc" id="L62">            setTheme(R.style.Theme_Dark);</span>
+        } else {
+<span class="fc" id="L64">            setTheme(R.style.Theme_Light);</span>
+        }
+<span class="fc" id="L66">        setContentView(R.layout.activity_main);</span>
+
+        // Get Logged In User ID from session.
+<span class="fc" id="L69">        userId = sharedpreferences.getString(&quot;LOGIN-ID&quot;, null);</span>
+<span class="fc" id="L70">        Log.d(&quot;MainActivity onCreate&quot;, &quot;Log In User ID : &quot; + userId);</span>
+
+<span class="fc" id="L72">        databaseHelper = new DatabaseHelper(MainActivity.this);</span>
+<span class="fc" id="L73">        populateUserLocations();</span>
+
+        // Initializing the UI components
+        // The list of locations should be customized per user (change the implementation so that
+        // buttons are added to layout
+<span class="fc" id="L78">        this.setTitle(getString(R.string.app_name) + &quot; - &quot; + getIntent().getStringExtra(&quot;login&quot;));</span>
+
+<span class="fc" id="L80">        locationSpinner = findViewById(R.id.locationSpinner);</span>
+
+        /**
+         * Lambda function for OnClickListener of buttonAddLocation.
+         * When the button is clicked, it populates the locationSpinner with available locations,
+         * toggles the visibility of location UI to VISIBLE, and sets the current action to add a location.
+         */
+<span class="fc" id="L87">        findViewById(R.id.buttonAddLocation).setOnClickListener(v -&gt;</span>
+                {
+<span class="fc" id="L89">                    populateLocationSpinner();</span>
+<span class="fc" id="L90">                    toggleLocationUI(View.VISIBLE);</span>
+<span class="fc" id="L91">                    currAction = CurrentAction.add;</span>
+<span class="fc" id="L92">                });</span>
+
+        /**
+         * Lambda function for OnClickListener of buttonRemoveLocation.
+         * When the button is clicked, it populates the locationSpinner with existing user locations,
+         * toggles the visibility of location UI to VISIBLE, and sets the current action to delete a location.
+         */
+<span class="fc" id="L99">        findViewById(R.id.buttonRemoveLocation).setOnClickListener(v -&gt;</span>
+            {
+<span class="fc" id="L101">                populateExistingLocationSpinner();</span>
+<span class="fc" id="L102">                toggleLocationUI(View.VISIBLE);</span>
+<span class="fc" id="L103">                currAction = CurrentAction.delete;</span>
+<span class="fc" id="L104">            });</span>
+
+        /**
+         * Lambda function for OnClickListener of saveButton.
+         * When the button is clicked, it calls the saveLocation() method to save or remove the selected location,
+         * depending on the current action.
+         */
+<span class="fc" id="L111">        findViewById(R.id.saveButton).setOnClickListener(v -&gt; saveLocation());</span>
+
+        /**
+         * Lambda function for OnClickListener of buttonLogOut.
+         * When the button is clicked, it navigates to the LoginActivity, and clears the session data.
+         */
+<span class="fc" id="L117">        findViewById(R.id.buttonLogOut).setOnClickListener(v -&gt; {</span>
+<span class="fc" id="L118">            Intent intent = new Intent(this, LoginActivity.class);</span>
+<span class="fc" id="L119">            startActivity(intent);</span>
+            // Clear Session data
+<span class="fc" id="L121">            SharedPreferences.Editor editor = sharedpreferences.edit();</span>
+<span class="fc" id="L122">            editor.clear();</span>
+<span class="fc" id="L123">            editor.apply();</span>
+<span class="fc" id="L124">        });</span>
+
+<span class="fc" id="L126">        saveButton = findViewById(R.id.saveButton);</span>
+
+<span class="fc" id="L128">        populateLocationSpinner();</span>
+<span class="fc" id="L129">    }</span>
+
+
+    /**
+     * Populates the Spinner with the location data.
+     */
+    private void populateLocationSpinner() {
+
+<span class="fc" id="L137">        List&lt;String&gt; availableLocations = new ArrayList&lt;&gt;(Arrays.asList(DEFAULT_SPINNER_MESSAGE));</span>
+<span class="fc" id="L138">        DatabaseHelper databaseHelper = new DatabaseHelper(MainActivity.this);</span>
+<span class="fc" id="L139">        availableLocations.addAll(databaseHelper.getCityList());</span>
+
+        // Remove user's already added locations from the available locations
+<span class="fc" id="L142">        availableLocations.removeAll(userLocations);</span>
+
+<span class="fc" id="L144">        ArrayAdapter&lt;String&gt; adapter = new ArrayAdapter&lt;&gt;(this, android.R.layout.simple_spinner_item, availableLocations);</span>
+<span class="fc" id="L145">        locationSpinner.setAdapter(adapter);</span>
+<span class="fc" id="L146">    }</span>
+
+    /**
+     * Populates the Spinner with the existing locations data.
+     */
+    private void populateExistingLocationSpinner() {
+<span class="fc" id="L152">        List&lt;String&gt; availableLocations = userLocations;</span>
+
+<span class="fc" id="L154">        ArrayAdapter&lt;String&gt; adapter = new ArrayAdapter&lt;&gt;(this, android.R.layout.simple_spinner_item, availableLocations);</span>
+<span class="fc" id="L155">        locationSpinner.setAdapter(adapter);</span>
+<span class="fc" id="L156">    }</span>
+
+    /**
+     * Handles saving the selected location and hiding the UI elements.
+     */
+    private void saveLocation() {
+
+<span class="fc" id="L163">        String selectedLocation = locationSpinner.getSelectedItem().toString();</span>
+
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (!DEFAULT_SPINNER_MESSAGE.equals(selectedLocation)) {</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">            if (currAction == CurrentAction.add) {</span>
+<span class="fc" id="L167">                databaseHelper.addLocation(userId, selectedLocation);</span>
+<span class="fc" id="L168">                Log.d(&quot;savedLocation&quot;, &quot;location: &quot; + selectedLocation);</span>
+            } else {
+<span class="fc" id="L170">                databaseHelper.deleteLocation(userId, selectedLocation);</span>
+<span class="fc" id="L171">                Log.d(&quot;removedLocation&quot;, &quot;location: &quot; + selectedLocation);</span>
+            }
+<span class="fc" id="L173">            populateUserLocations();</span>
+        }
+
+        // Hide Spinner and Save button after saving
+<span class="fc" id="L177">        toggleLocationUI(View.GONE);</span>
+<span class="fc" id="L178">    }</span>
+
+    /**
+     * Toggles the visibility of UI elements related to adding a new location.
+     *
+     * @param visibility One of {@link View#VISIBLE}, {@link View#INVISIBLE}, or {@link View#GONE}.
+     */
+    private void toggleLocationUI(int visibility) {
+<span class="fc" id="L186">        locationSpinner.setVisibility(visibility);</span>
+<span class="fc" id="L187">        saveButton.setVisibility(visibility);</span>
+<span class="fc" id="L188">    }</span>
+
+    /**
+     * Dynamically populates the list of locations based on the user's saved locations.
+     * For each location, a linear layout containing a TextView (for location name) and
+     * a Button (for showing details) is added to the main layout.
+     */
+    private void populateUserLocations() {
+<span class="fc" id="L196">        userLocations = databaseHelper.getUserLocations(userId);</span>
+<span class="fc" id="L197">        Log.d(&quot;populateUserLocations&quot;, &quot;locations : &quot; + userLocations);</span>
+
+        // Reference the container in which dynamic location entries will be added
+<span class="fc" id="L200">        LinearLayout locationsContainer = findViewById(R.id.locationsContainer);</span>
+
+        // Clear the existing location views from the container
+<span class="fc" id="L203">        locationsContainer.removeAllViews();</span>
+
+        // Fetch the updated list of user locations from the database
+<span class="fc" id="L206">        userLocations = databaseHelper.getUserLocations(userId);</span>
+
+        // Iterate over the list of user locations and create dynamic entries
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        for (String location : userLocations) {</span>
+<span class="fc" id="L210">            LinearLayout entry = createLocationEntry(location);</span>
+<span class="fc" id="L211">            locationsContainer.addView(entry);</span>
+<span class="fc" id="L212">        }</span>
+<span class="fc" id="L213">    }</span>
+
+
+    /**
+     * Creates a LinearLayout entry representing a user location with associated details button.
+     *
+     * @param location The name of the location.
+     * @return A LinearLayout containing a TextView for the location name and a Button to view details.
+     */
+    private LinearLayout createLocationEntry(String location) {
+<span class="fc" id="L223">        LinearLayout linearLayout = new LinearLayout(this);</span>
+<span class="fc" id="L224">        linearLayout.setOrientation(LinearLayout.HORIZONTAL);</span>
+<span class="fc" id="L225">        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);</span>
+<span class="fc" id="L226">        linearLayout.setLayoutParams(layoutParams);</span>
+
+<span class="fc" id="L228">        TextView textView = new TextView(this);</span>
+<span class="fc" id="L229">        textView.setText(location);</span>
+<span class="fc" id="L230">        textView.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));</span>
+<span class="fc" id="L231">        linearLayout.addView(textView);</span>
+
+        /**
+         * Add Weather button
+         */
+<span class="fc" id="L236">        Button buttonWeather = new Button(this);</span>
+<span class="fc" id="L237">        buttonWeather.setText(&quot;Weather&quot;);</span>
+<span class="fc" id="L238">        buttonWeather.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));</span>
+
+        /**
+         * Lambda function for OnClickListener of details button in each location entry.
+         * When the button is clicked, it navigates to the DetailsActivity, passing the location name as an extra.
+         */
+<span class="fc" id="L244">        buttonWeather.setOnClickListener(v -&gt; {</span>
+<span class="nc" id="L245">            Intent intent = new Intent(MainActivity.this, WeatherActivity.class);</span>
+<span class="nc" id="L246">            intent.putExtra(&quot;selectedCity&quot;, location);</span>
+<span class="nc" id="L247">            startActivity(intent);</span>
+<span class="nc" id="L248">        });</span>
+<span class="fc" id="L249">        linearLayout.addView(buttonWeather);</span>
+
+        /**
+         * Add Map button
+         */
+
+<span class="fc" id="L255">        Button buttonMap = new Button(this);</span>
+<span class="fc" id="L256">        buttonMap.setText(&quot;Map&quot;);</span>
+<span class="fc" id="L257">        buttonMap.setTag(location);</span>
+<span class="fc" id="L258">        buttonMap.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));</span>
+
+        /**
+         * Lambda function for OnClickListener of details button in each location entry.
+         * When the button is clicked, it navigates to the DetailsActivity, passing the location name as an extra.
+         */
+<span class="fc" id="L264">        buttonMap.setOnClickListener(v -&gt; {</span>
+<span class="nc" id="L265">            Intent intent = new Intent(MainActivity.this, MapActivity.class);</span>
+<span class="nc" id="L266">            intent.putExtra(&quot;selectedCity&quot;, location);</span>
+<span class="nc" id="L267">            startActivity(intent);</span>
+<span class="nc" id="L268">        });</span>
+<span class="fc" id="L269">        linearLayout.addView(buttonMap);</span>
+
+
+<span class="fc" id="L272">        return linearLayout;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 7.4.2</div></body></html>

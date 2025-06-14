@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name = "themespinner">ThemeSpinner</string>
+    <string-array name="themes">
+        <item>Select Theme</item>
+        <item>Dark</item>
+        <item>Light</item>
+    </string-array>
+
+
+</resources>
