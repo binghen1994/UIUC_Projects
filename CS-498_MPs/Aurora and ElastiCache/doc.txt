@@ -1,0 +1,58 @@
+RDS:
+master username: cs498mp6
+BINGhen1994
+
+keypair in folder: cs498mp6
+
+
+RDS endpoint writer: mp6db.cluster-czccados7xks.us-east-1.rds.amazonaws.com
+PORT 3306
+
+mysql -h mp6db.cluster-czccados7xks.us-east-1.rds.amazonaws.com -u cs498mp6 -p
+
+Redis
+
+cs498mp6
+
+
+CREATE TABLE herostb (
+    id INT NOT NULL,
+    hero VARCHAR(20),
+    power VARCHAR(20),
+    name VARCHAR(20),
+    xp VARCHAR(20),
+    color VARCHAR(20),
+PRIMARY KEY (id)
+);
+
+INSERT INTO 
+    herostb(id, hero, power, name, xp, color)
+VALUES
+    ('1','yes','fly','batman','100','black'),
+    ('2','yes','run','superman','10','red'),
+    ('3','no','eat','bananaman','30','yellow'),
+    ('4','yes','fly','spiderman','45','red'),
+    ('5','no','jump','goatman','33','white'),
+    ('6','maybe','fight','brave','45','blue'),
+    ('7','no','wash','cinderella','12','pink'),
+    ('8','no','freeze','elisa','34','white'),
+    ('9','yes','steal','robinhood','67','green'),
+    ('10','no','think','gandalf','86','grey'),
+    ('11','no','run','catman','84','brown'),
+    ('12','no','catch','dogman','47','brown'),
+    ('13','maybe','stink','eggman','58','white'),
+    ('14','maybe','swim','fishman','58','blue'),
+    ('15','no','fly','birdman','2','grey'),
+    ('16','no','fly','flyman','32','black'),
+    ('17','no','stay','sofaman','77','red'),
+    ('18','maybe','scream','beast','33','brown'),
+    ('19','no','hide','goblin','67','green'),
+    ('20','yes','smile','charming','97','white'),
+    ('21','yes','stink','shrek','32','green'),
+    ('22','no','eat','appleman','25','red'),
+    ('23','maybe','grow','spinachman','65','green'),
+    ('24','no','hide','antman','37','black'),
+    ('25','yes','steal','mouseman','76','grey');
+
+
+zip -r ..\my-deployment-package.zip .

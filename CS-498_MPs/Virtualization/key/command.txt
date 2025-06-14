@@ -1,0 +1,1 @@
+pscp -i E:\Study\cs\UIUC\CS498_CCA\MP12\key\mp12host.ppk E:\Study\cs\UIUC\CS498_CCA\MP12\MP12_PublicFiles\server.py ec2-user@ec2-44-201-153-41.compute-1.amazonaws.com:/home/ec2-user/server.py

@@ -1,0 +1,61 @@
+CREATE TABLE flights (
+year	INT,
+month	INT,
+day	INT,
+airline	VARCHAR(255),
+origin_airport	VARCHAR(255),
+destination_airport	VARCHAR(255),
+SCHEDULED_DEPARTURE	INT,
+DEPARTURE_TIME	INT,
+DEPARTURE_DELAY	INT,
+SCHEDULED_TIME	INT,
+ELAPSED_TIME	INT,
+SCHEDULED_ARRIVAL	INT,
+ARRIVAL_TIME	INT,
+ARRIVAL_DELAY	INT,
+DIVERTED	INT,
+CANCELLED	INT,
+PRIMARY KEY	(YEAR,MONTH,DAY,AIRLINE,ORIGIN_AIRPORT,SCHEDULED_DEPARTURE,ARRIVAL_TIME)
+);
+
+
+
+
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/flights-1.csv'
+INTO TABLE flights
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n' 
+IGNORE 1 ROWS
+ (@DEPARTURE_TIME, @DEPARTURE_DELAY, @SCHEDULED_TIME, @ELAPSED_TIME,@ARRIVAL_TIME,@ARRIVAL_DELAY) 
+       SET DEPARTURE_DELAY = IF(@DEPARTURE_DELAY = '', NULL, @DEPARTURE_DELAY), 
+           SCHEDULED_TIME = IF(@SCHEDULED_TIME = '', NULL, @SCHEDULED_TIME), 
+           ELAPSED_TIME = IF(@ELAPSED_TIME = '', NULL, @ELAPSED_TIME), 
+           ARRIVAL_TIME = IF(@ARRIVAL_TIME = '', NULL, @ARRIVAL_TIME),
+		ARRIVAL_DELAY = IF(@ARRIVAL_DELAY = '', NULL, @ARRIVAL_DELAY);
+
+
+ALTER TABLE flights MODIFY COLUMN AIR_SYSTEM_DELAY INT NULL;
+
+
+
+SELECT airline,origin_airport,destination_airport
+FROM "mp9flights"."mp9_flights_yulu"
+WHERE day=25
+AND month=12
+AND origin_airport='ORD'
+AND (scheduled_departure>=800 AND scheduled_departure<=1159)
+
+
+SELECT f1.airline AS Airline, f1.origin_airport AS Origin_Airport, f1.destination_airport AS Stopover_Airport, f2.destination_airport AS Destination_Airport, f1.DEPARTURE_DELAY AS Origin_Departure_Delay, f1.ARRIVAL_DELAY AS Stopover_Arrival_Delay, f2.DEPARTURE_DELAY AS Stopover_Departure_Delay, f2.ARRIVAL_DELAY AS Destination_Arrival_Delay
+FROM  "mp9flights"."mp9_flights_yulu" f1, "mp9flights"."mp9_flights_yulu" f2
+WHERE f1.airline=f2.airline
+AND f1.origin_airport='SFO' AND f2.destination_airport='JFK'
+AND f1.destination_airport=f2.origin_airport
+AND f1.cancelled=0 AND f2.cancelled=0
+AND (f2.day*24*60 + (f2.scheduled_departure / 100)*60 + (f2.scheduled_departure % 100) + f2.departure_delay - (f1.day*24*60 + (f1.scheduled_departure / 100)*60 + (f1.scheduled_departure % 100) + f1.departure_delay + f1.elapsed_time + ((f1.scheduled_arrival / 100)*60 + (f1.scheduled_arrival % 100) - ((f1.scheduled_departure / 100)*60 + (f1.scheduled_departure % 100) + f1.scheduled_time)%(24*60))))>=60
+AND (f2.day*24*60 + (f2.scheduled_departure / 100)*60 + (f2.scheduled_departure % 100) + f2.departure_delay - (f1.day*24*60 + (f1.scheduled_departure / 100)*60 + (f1.scheduled_departure % 100) + f1.departure_delay + f1.elapsed_time + ((f1.scheduled_arrival / 100)*60 + (f1.scheduled_arrival % 100) - ((f1.scheduled_departure / 100)*60 + (f1.scheduled_departure % 100) + f1.scheduled_time)%(24*60))))<=180
+;
+
+
+
+
