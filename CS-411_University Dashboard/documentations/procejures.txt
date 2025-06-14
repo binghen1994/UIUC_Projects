@@ -1,0 +1,71 @@
+Procejures:
+
+1. Home page
+	a. Type a keyword
+		Can check invalid and valid keyword
+		Backend check using MySQL
+	
+	b. Similar keyword
+		A new table in MySQL record timestamp of each keyword search
+		Simple Algorithm: Sort by count of each entry of search
+		
+
+		
+2. Keyword page
+	6 widgets all related to keyword-search
+	2 on faculty, 2 on affiliation and 2 on publication
+	
+	a. faculty list
+		returns the faculty with highest scores on input keyword
+		Queried in Mongo
+		
+	b. faculty interest
+		gives the overall interest of faculty over time
+		algorithm: if a faculty has at least one publication having input keyword that year, he is considered showing interest in that year
+		Queried in MySQL
+		
+	c. affiliation list
+		gives affiliation with highest scores on keyword
+		Total Score is the sum of all professors in an affiliation
+		Queried in Mongo
+		
+	d. faculty count of affiliation
+		shows the faculty count of each affiliation interested in keyword
+		only select top 10 affiliation ranked by faculty count
+		Queried in MySQL
+		
+	e. publication list
+		returns publications with highest scores on input keyword
+		queried in Mongo
+		
+	f. publication of keywords
+		returns interest of publication of input keyword over year
+		if a publication has input keyword, its interested in that keyword
+		Queried in MySQL
+
+
+3. Similar Keyword
+
+	Gives out similar keyword based on search.
+	
+	a. This is an extra functionality
+
+	b. Intuition: There are a lot of keywords in our database. They all hold certain similarities. There are some keywords which are different forms of a single vocabulary, e.g. algorithm and algorithms, which should share almost the same meaning. We develop a simple extra widget to help user find out the possible similar keywords when doing search.
+
+	c. algorithm: Using word-forms package to generate a words different forms, search MySQL with words that contains these words, then add similar relationship in neo4j. Finally, we can use shortest path in neo4j to query similar keywords that have closer relationship to current keyword.
+	
+	
+4. Faculty/Affiliation/Publication Page
+
+    Multi-page application with info pages on detail items in the database.
+
+    a. This is an extra functionality using RestAPI.
+
+    b. They all have profile bar and a connection widget.
+
+    c. Connection widget is to get similar faculty/affiliation/publication of each given data type. Users may want to find similar faculty/affiliation/publications, so this is a good widget for them.
+    It uses shortest path algorithm in neo4j. After getting the result, we use dash-cytoscape to visualize the graph result which we usually see in neo4j browser.
+
+
+
+	
