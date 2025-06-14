@@ -18,6 +18,7 @@
 
 ## Usage
 Upon executing the `dash/app.py` script, you will be directed to a URL provided by the dash framework, leading to our web application page. To explore the contents of our application, input the keyword of interest into the search bar provided and subsequently click on any of the listed faculties, institutes or publications. This will redirect you to a more detailed page with additional information.
+See a introduction video of this project here: https://youtu.be/0rKX97-enpw
 ## Design
 
 The Keyworld web application is intended to allow individuals to explore and identify faculties, affiliations, and publications of interest by performing a simple keyword search. The application's architecture may be divided into three primary components: the client-side, the server-side, and the database.
