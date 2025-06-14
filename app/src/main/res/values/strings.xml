@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">Team 5</string>
-    <string name="saveAddedLocationButton">Save</string>
-    <string name="api_name">"http://api.weatherstack.com"</string>
-    <string name="api_entry" >9b1917d3b4de5eff63a1839872903e2a</string>
-
-</resources>
