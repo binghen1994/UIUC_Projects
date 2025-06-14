@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RegistrationActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">edu.uiuc.cs427app</a> &gt; <span class="el_source">RegistrationActivity.java</span></div><h1>RegistrationActivity.java</h1><pre class="source lang-java linenums">package edu.uiuc.cs427app;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.ui.AppBarConfiguration;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.ui.AppBarConfiguration;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+// Define the RegistrationActivity class, which is an AppCompatActivity and implements View.OnClickListener.
+/**
+ * The RegistrationActivity class is responsible for handling user registration.
+ * It allows users to input their details and select a theme, and upon successful registration,
+ * the user is added to the database.
+ */
+<span class="fc" id="L45">public class RegistrationActivity extends AppCompatActivity implements View.OnClickListener {</span>
+    /**
+     * Called when the activity is first created. This method initializes the user interface
+     * and sets up event listeners for buttons and the theme spinner.
+     *
+     * @param savedInstanceState The previously saved instance state, if available.
+     */
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L54">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L55">        setContentView(R.layout.activity_registration); // Set the activity layout.</span>
+
+        // Find the RegisterButton in the layout and set an OnClickListener.
+<span class="fc" id="L58">        Button rButton = findViewById(R.id.RegisterButton);</span>
+<span class="fc" id="L59">        rButton.setOnClickListener(this);</span>
+
+        // Find the spinner and set up its adapter to populate it with theme options.
+<span class="fc" id="L62">        Spinner spinner = findViewById(R.id.spinner2);</span>
+<span class="fc" id="L63">        ArrayAdapter&lt;CharSequence&gt; adapter1 = ArrayAdapter.createFromResource(this, R.array.themes, android.R.layout.simple_spinner_item);</span>
+<span class="fc" id="L64">        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);</span>
+<span class="fc" id="L65">        spinner.setAdapter(adapter1);</span>
+
+        // Set up a listener to capture the selected theme from the spinner.
+<span class="fc" id="L68">        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {</span>
+            @Override
+            public void onItemSelected(AdapterView&lt;?&gt; parentView, View selectedItemView, int position, long id) {
+<span class="fc" id="L71">                String selectedTheme = spinner.getSelectedItem().toString();</span>
+                // You can use 'selectedTheme' in your code as needed.
+<span class="fc" id="L73">            }</span>
+
+            @Override
+            public void onNothingSelected(AdapterView&lt;?&gt; parentView) {
+                // Handle the case where nothing is selected (optional).
+<span class="nc" id="L78">            }</span>
+        });
+
+        // Find the BackButton in the layout and set an OnClickListener.
+<span class="fc" id="L82">        Button backButton = findViewById(R.id.BackButton);</span>
+<span class="fc" id="L83">        backButton.setOnClickListener(this);</span>
+<span class="fc" id="L84">    }</span>
+
+
+    /**
+     * Handles click events for buttons. Depending on which button is clicked,
+     * this method performs the corresponding action, such as registering a user
+     * or navigating back to the login screen.
+     *
+     * @param view The view that was clicked (e.g., RegisterButton or BackButton).
+     */
+
+    @Override
+    public void onClick(View view) {
+        // Implement click actions based on the clicked view (e.g., RegisterButton or BackButton).
+        Intent intent;
+<span class="pc bpc" id="L99" title="2 of 3 branches missed.">        switch (view.getId()) {</span>
+            case R.id.RegisterButton:
+                // Find various input fields and retrieve their values.
+<span class="fc" id="L102">                TextView userIdText = findViewById(R.id.userIDTextBox);</span>
+<span class="fc" id="L103">                TextView userText = findViewById(R.id.usernameTextBox);</span>
+<span class="fc" id="L104">                TextView passText = findViewById(R.id.passwordTextBox);</span>
+<span class="fc" id="L105">                Spinner themeText = (Spinner) findViewById(R.id.spinner2);</span>
+
+                // Define error messages for invalid input.
+<span class="fc" id="L108">                String userIDErrMsg = &quot;Invalid User Id&quot;;</span>
+<span class="fc" id="L109">                String userErrMsg = &quot;Invalid Username&quot;;</span>
+<span class="fc" id="L110">                String passErrMsg = &quot;Invalid Password&quot;;</span>
+<span class="fc" id="L111">                String themeErrMsg = &quot;Please select theme&quot;;</span>
+
+                // Retrieve input values as strings.
+<span class="fc" id="L114">                String userIDStrValue = userIdText.getText().toString();</span>
+<span class="fc" id="L115">                String userStrValue = userText.getText().toString();</span>
+<span class="fc" id="L116">                String passStrValue = passText.getText().toString();</span>
+<span class="fc" id="L117">                String themeStrValue = themeText.getSelectedItem().toString();</span>
+
+                // Check for empty or invalid input.
+<span class="fc" id="L120">                boolean a = themeStrValue.equals(&quot;Select Theme&quot;);</span>
+<span class="fc" id="L121">                boolean b = userIDStrValue.equals(&quot;&quot;);</span>
+<span class="fc" id="L122">                boolean c = userStrValue.equals(&quot;&quot;);</span>
+<span class="fc" id="L123">                boolean d = passStrValue.equals(&quot;&quot;);</span>
+
+                // Show error messages for invalid input.
+<span class="pc bpc" id="L126" title="4 of 8 branches missed.">                if (a || b || c || d) {</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                    if (a) {</span>
+<span class="nc" id="L128">                        Toast.makeText(this, themeErrMsg, Toast.LENGTH_LONG).show();</span>
+                    }
+<span class="nc bnc" id="L130" title="All 2 branches missed.">                    if (b) {</span>
+<span class="nc" id="L131">                        Toast.makeText(this, userIDErrMsg, Toast.LENGTH_LONG).show();</span>
+                    }
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                    if (c) {</span>
+<span class="nc" id="L134">                        Toast.makeText(this, userErrMsg, Toast.LENGTH_LONG).show();</span>
+                    }
+<span class="nc bnc" id="L136" title="All 2 branches missed.">                    if (d) {</span>
+<span class="nc" id="L137">                        Toast.makeText(this, passErrMsg, Toast.LENGTH_LONG).show();</span>
+                    }
+                } else {
+                    // Create a UserBO object, set its attributes, and add it to the database.
+<span class="fc" id="L141">                    UserBO user1 = new UserBO();</span>
+<span class="fc" id="L142">                    user1.userId = userIDStrValue;</span>
+<span class="fc" id="L143">                    user1.userName = userStrValue;</span>
+<span class="fc" id="L144">                    user1.password = passStrValue;</span>
+<span class="fc" id="L145">                    user1.userTheme = themeStrValue;</span>
+<span class="fc" id="L146">                    DatabaseHelper database1 = new DatabaseHelper(RegistrationActivity.this);</span>
+<span class="fc" id="L147">                    database1.addUSer(user1);</span>
+<span class="fc" id="L148">                    Toast.makeText(this, &quot;User Successfully Added!&quot;, Toast.LENGTH_LONG).show();</span>
+                }
+<span class="fc" id="L150">                break;</span>
+
+            case R.id.BackButton:
+                // Navigate to the LoginActivity when the BackButton is clicked.
+<span class="nc" id="L154">                intent = new Intent(this, LoginActivity.class);</span>
+<span class="nc" id="L155">                startActivity(intent);</span>
+                break;
+        }
+<span class="fc" id="L158">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 7.4.2</div></body></html>

@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatabaseHelper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">edu.uiuc.cs427app</a> &gt; <span class="el_source">DatabaseHelper.java</span></div><h1>DatabaseHelper.java</h1><pre class="source lang-java linenums">package edu.uiuc.cs427app;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * The DatabaseHelper class is responsible for managing the SQLite database used for user data and location mapping.
+ * It provides methods for creating and updating the database, adding and retrieving user information,
+ * and managing user-location mappings.
+ */
+
+public class DatabaseHelper extends SQLiteOpenHelper {
+
+    public static final String USER_TABLE = &quot;USER_TABLE&quot;;
+    public static final String UID = &quot;UID&quot;;
+    public static final String USERID = &quot;USERID&quot;;
+    public static final String USER_NAME = &quot;USER_NAME&quot;;
+    public static final String PASSWORD = &quot;PASSWORD&quot;;
+    public static final String USER_THEME = &quot;USER_THEME&quot;;
+
+    public static final String USER_LOC_MAP = &quot;USER_LOC_MAP&quot;;
+    public static final String LOC_ID = &quot;LOC_ID&quot;;
+
+    public static final String LOC_TABLE = &quot;LOC_TABLE&quot;;
+    public static final String LOC_NAME = &quot;LOC_NAME&quot;;
+
+    public static final String CITY_TABLE = &quot;CITY_TABLE&quot;;
+
+    public static final String CITY_NAME = &quot;CITY_NAME&quot;;
+
+
+    /**
+     * Constructs a new DatabaseHelper instance.
+     *
+     * @param context The context in which the database is created.
+     */
+
+    public DatabaseHelper(@Nullable Context context) {
+<span class="fc" id="L48">        super(context, &quot;teamFive.db&quot;, null, 1);</span>
+<span class="fc" id="L49">    }</span>
+
+    /**
+     * Called when the database is created for the first time. This method defines the database schema
+     * by creating the User and UserLocationMap tables.
+     *
+     * @param db The SQLite database to create.
+     */
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        // Create User Table
+<span class="nc" id="L60">        String createUserTable = &quot; CREATE TABLE &quot; + USER_TABLE + &quot; ( &quot; + UID + &quot; INTEGER PRIMARY KEY AUTOINCREMENT , &quot; +</span>
+                USERID + &quot; VARCHAR(50), &quot; + USER_NAME + &quot; VARCHAR(50), &quot; + PASSWORD + &quot; VARCHAR(50), &quot; +
+                USER_THEME + &quot; VARCHAR(30)) &quot;;
+
+
+<span class="nc" id="L65">        String createUserLocMapTable = &quot; CREATE TABLE &quot; + USER_LOC_MAP + &quot; ( &quot; +</span>
+                USERID + &quot; VARCHAR(50), &quot; + LOC_NAME + &quot; VARCHAR(50) ) &quot;;
+
+<span class="nc" id="L68">        String createCityTable = &quot; CREATE TABLE &quot; + CITY_TABLE + &quot; ( &quot; +</span>
+                CITY_NAME + &quot; VARCHAR(50) ) &quot;;
+
+<span class="nc" id="L71">        db.execSQL(createUserTable);</span>
+<span class="nc" id="L72">        db.execSQL(createUserLocMapTable);</span>
+<span class="nc" id="L73">        db.execSQL(createCityTable);</span>
+
+<span class="nc" id="L75">    }</span>
+
+    /**
+     * If DB Update require will use this
+      */
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+
+<span class="nc" id="L84">    }</span>
+
+
+    /**
+     * Adds a user to the User Table. Used for user registration.
+     *
+     * @param userBO The UserBO object containing user details.
+     * @return True if the user is successfully added, false otherwise.
+     */
+
+    // This method will a User to User table. Use it for User Registration
+    public boolean addUSer(UserBO userBO) {
+<span class="fc" id="L96">        SQLiteDatabase db = this.getWritableDatabase();</span>
+<span class="fc" id="L97">        ContentValues cv = new ContentValues();</span>
+<span class="fc" id="L98">        cv.put(USERID, userBO.getUserId());</span>
+<span class="fc" id="L99">        cv.put(USER_NAME,userBO.getUserName());</span>
+<span class="fc" id="L100">        cv.put(PASSWORD,userBO.getPassword());</span>
+<span class="fc" id="L101">        cv.put(USER_THEME,userBO.getUserTheme());</span>
+
+<span class="fc" id="L103">        long insert = db.insert(USER_TABLE, null, cv);</span>
+<span class="fc" id="L104">        db.close();</span>
+
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if(insert == -1) {</span>
+<span class="nc" id="L107">            return false;</span>
+        }else{
+<span class="fc" id="L109">            return true;</span>
+        }
+
+    }
+
+
+    /**
+     * populateCities to City Master table
+     * populateCities to City Master Table for available choices
+     *  @return boolean
+     */
+    public boolean populateCities() {
+
+<span class="fc" id="L122">        final String[] CITY_LIST = {&quot;Champaign&quot;, &quot;Chicago&quot;, &quot;New York&quot;,&quot;Los Angeles&quot;, &quot;San Francisco&quot;,&quot;Springfield&quot;, &quot;Rockford&quot;, &quot;Urbana&quot;, &quot;Moline&quot;};</span>
+
+<span class="fc" id="L124">        long insert = -1;</span>
+
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">        boolean cityExist = (getCityList().size() &gt; 0) ? true :  false;</span>
+
+<span class="fc" id="L128">        SQLiteDatabase db = this.getWritableDatabase();</span>
+<span class="fc" id="L129">        ContentValues cv = new ContentValues();</span>
+
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if(cityExist){</span>
+<span class="fc" id="L132">            db.delete(CITY_TABLE,null , null);</span>
+        }
+
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        for (String city : CITY_LIST){</span>
+<span class="fc" id="L136">            cv.put(CITY_NAME, city);</span>
+<span class="fc" id="L137">            insert = db.insert(CITY_TABLE, null, cv);</span>
+        }
+
+<span class="fc" id="L140">        db.close();</span>
+
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if(insert == -1) {</span>
+<span class="nc" id="L143">            return false;</span>
+        }else{
+<span class="fc" id="L145">            return true;</span>
+        }
+
+    }
+
+    /**
+     * getCityList for drop down population from city master table
+     * @return List&lt;String&gt;
+     */
+    public List&lt;String&gt; getCityList(){
+
+<span class="fc" id="L156">        String queryString = &quot; SELECT * FROM &quot; + CITY_TABLE ;</span>
+
+<span class="fc" id="L158">        SQLiteDatabase db = this.getReadableDatabase();</span>
+
+<span class="fc" id="L160">        List&lt;String&gt; cityList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L162">        Cursor cursor = db.rawQuery(queryString, null);</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">        if(cursor.moveToFirst()){</span>
+            do {
+<span class="fc" id="L165">                cityList.add(cursor.getString(0).toString());</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">            }while(cursor.moveToNext());</span>
+        }
+<span class="fc" id="L168">        cursor.close();</span>
+<span class="fc" id="L169">        db.close();</span>
+<span class="fc" id="L170">        return cityList;</span>
+
+    }
+
+
+    /**
+     * Retrieves user details based on user ID and password.
+     *
+     * @param userId     The user's ID.
+     * @param password   The user's password.
+     * @return A UserBO object containing the user's details, or an empty UserBO if not found.
+     */
+    // This will fetch a User details based on user id and password
+    public UserBO getUSer(String userId, String password){
+
+<span class="fc" id="L185">        UserBO userBO = new UserBO();</span>
+
+<span class="fc" id="L187">        String queryString = &quot;SELECT * FROM &quot; + USER_TABLE + &quot; WHERE  &quot; + USERID + &quot; =  '&quot; + userId + &quot;' AND &quot;</span>
+                + PASSWORD + &quot; = '&quot;  +   password + &quot;' &quot;;
+
+<span class="fc" id="L190">        SQLiteDatabase db = this.getReadableDatabase();</span>
+
+<span class="fc" id="L192">        Cursor cursor = db.rawQuery(queryString, null);</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        if(cursor.moveToFirst()){</span>
+            do {
+<span class="fc" id="L195">                int uid = cursor.getInt(0);</span>
+
+<span class="fc" id="L197">                userBO.setUserId(cursor.getString(1).toString());</span>
+<span class="fc" id="L198">                userBO.setUserName(cursor.getString(2).toString());</span>
+<span class="fc" id="L199">                userBO.setPassword(cursor.getString(3).toString());</span>
+<span class="fc" id="L200">                userBO.setUserTheme(cursor.getString(4).toString());</span>
+
+<span class="fc bfc" id="L202" title="All 2 branches covered.">            }while(cursor.moveToNext());</span>
+        }
+<span class="fc" id="L204">        cursor.close();</span>
+<span class="fc" id="L205">        db.close();</span>
+<span class="fc" id="L206">        return userBO;</span>
+
+    }
+
+    /**
+     * Deletes a test user based on user ID. This method is used to clean up test users during database initialization.
+     *
+     * @param userId The user ID to be deleted.
+     */
+    // This will clean Test users upon DB initialization
+    public void  deleteTestUser(String userId){
+
+<span class="fc" id="L218">        SQLiteDatabase db = this.getWritableDatabase();</span>
+
+        try{
+<span class="fc" id="L221">            db.delete(USER_LOC_MAP, &quot;USERID = ?&quot;, new String[]{userId});</span>
+<span class="fc" id="L222">            db.delete(USER_TABLE,&quot; USERID = ? &quot;, new String[]{userId});</span>
+<span class="fc" id="L223">            System.out.println(&quot; Deleted successfully &quot;);</span>
+<span class="nc" id="L224">        }catch (Exception ex){</span>
+<span class="nc" id="L225">            System.out.println(&quot; Deleted Failed &quot;);</span>
+<span class="nc" id="L226">            ex.printStackTrace();</span>
+<span class="fc" id="L227">        }</span>
+<span class="fc" id="L228">        db.close();</span>
+<span class="fc" id="L229">    }</span>
+    /**
+     * Adds test user-location mappings. This is typically used for testing and adds predefined user-location associations.
+     *
+     * @return True if the mappings are added successfully, false otherwise.
+     */
+    // Add Test Location Map
+    public boolean addTestUSerLocMapping() {
+<span class="fc" id="L237">        SQLiteDatabase db = this.getWritableDatabase();</span>
+
+<span class="fc" id="L239">        ContentValues cv = new ContentValues();</span>
+<span class="fc" id="L240">        String userId = &quot;Test&quot;;</span>
+        //db.delete(USER_LOC_MAP,&quot; USERID = ? &quot;, new String[]{userId});
+
+<span class="fc" id="L243">        userId = &quot;Test1&quot;;</span>
+        //db.delete(USER_LOC_MAP,&quot; USERID = ? &quot;, new String[]{userId});
+
+<span class="fc" id="L246">        long insert = -1;</span>
+<span class="fc" id="L247">        int i = 1;</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        while (i&lt;5){</span>
+<span class="fc" id="L249">            cv.put(USERID, &quot;Test&quot;);</span>
+<span class="fc" id="L250">            cv.put(LOC_NAME,&quot;Chicago-&quot; + i);</span>
+            //insert = db.insert(USER_LOC_MAP, null, cv);
+<span class="fc" id="L252">            i++;</span>
+        }
+
+<span class="fc" id="L255">        int j = 1;</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">        while (j&lt;5){</span>
+<span class="fc" id="L257">            cv.put(USERID, &quot;Test1&quot;);</span>
+<span class="fc" id="L258">            cv.put(LOC_NAME,&quot;Buffalo-&quot; + j);</span>
+            //insert = db.insert(USER_LOC_MAP, null, cv);
+<span class="fc" id="L260">            j++;</span>
+        }
+<span class="fc" id="L262">        db.close();</span>
+
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">        return insert != -1;</span>
+
+    }
+    /**
+     * Retrieves all location names for a given user ID in ascending order.
+     *
+     * @param userId The user ID for which locations are retrieved.
+     * @return A list of location names for the user.
+     */
+    // This will fetch all location names for a given user id in ascending order
+    public List&lt;String&gt; getUserLocations(String userId) {
+<span class="fc" id="L275">        List&lt;String&gt; locations = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L277">        String queryString = &quot;SELECT &quot; + LOC_NAME + &quot; FROM &quot; + USER_LOC_MAP + &quot; WHERE  &quot; + USERID + &quot; =  ?&quot; + &quot; ORDER BY &quot; + LOC_NAME + &quot; ASC&quot;;</span>
+
+<span class="fc" id="L279">        SQLiteDatabase db = this.getReadableDatabase();</span>
+<span class="fc" id="L280">        Cursor cursor = db.rawQuery(queryString, new String[]{userId});</span>
+
+<span class="fc bfc" id="L282" title="All 2 branches covered.">        if (cursor.moveToFirst()) {</span>
+            do {
+<span class="fc" id="L284">                locations.add(cursor.getString(0));</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">            } while (cursor.moveToNext());</span>
+        }
+<span class="fc" id="L287">        cursor.close();</span>
+<span class="fc" id="L288">        db.close();</span>
+<span class="fc" id="L289">        return locations;</span>
+    }
+
+    /**
+     * Adds a location for a given user ID only if it doesn't already exist.
+     *
+     * @param userId   The user ID to which the location is added.
+     * @param location The location name to be added.
+     */
+    // This method adds a location for a given user id only if it doesn't exist
+    public void addLocation(String userId, String location) {
+<span class="fc" id="L300">        SQLiteDatabase db = this.getReadableDatabase();</span>
+
+        // Check if the location already exists for the user
+<span class="fc" id="L303">        String queryString = &quot;SELECT &quot; + LOC_NAME + &quot; FROM &quot; + USER_LOC_MAP + &quot; WHERE &quot; + USERID + &quot; = ? AND &quot; + LOC_NAME + &quot; = ?&quot;;</span>
+<span class="fc" id="L304">        Cursor cursor = db.rawQuery(queryString, new String[]{userId, location});</span>
+<span class="fc" id="L305">        boolean locationExists = cursor.moveToFirst();</span>
+<span class="fc" id="L306">        cursor.close();</span>
+
+        // If location doesn't exist, add it
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        if (!locationExists) {</span>
+<span class="fc" id="L310">            ContentValues cv = new ContentValues();</span>
+<span class="fc" id="L311">            cv.put(USERID, userId);</span>
+<span class="fc" id="L312">            cv.put(LOC_NAME, location);</span>
+
+<span class="fc" id="L314">            db.insert(USER_LOC_MAP, null, cv);</span>
+        }
+<span class="fc" id="L316">        db.close();</span>
+<span class="fc" id="L317">    }</span>
+
+    /**
+     * This method removes a location for a given user id only if it exists
+     * @param userId
+     * @param location
+     */
+    public void deleteLocation(String userId, String location) {
+<span class="fc" id="L325">        SQLiteDatabase db = this.getReadableDatabase();</span>
+
+        // Check if the location already exists for the user
+<span class="fc" id="L328">        String queryString = &quot;SELECT &quot; + LOC_NAME + &quot; FROM &quot; + USER_LOC_MAP + &quot; WHERE &quot; + USERID + &quot; = ? AND &quot; + LOC_NAME + &quot; = ?&quot;;</span>
+<span class="fc" id="L329">        Cursor cursor = db.rawQuery(queryString, new String[]{userId, location});</span>
+<span class="fc" id="L330">        boolean locationExists = cursor.moveToFirst();</span>
+<span class="fc" id="L331">        cursor.close();</span>
+
+        // If location exists, remove it
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">        if (locationExists) {</span>
+<span class="fc" id="L335">            String[] whereArgs = new String[]{userId, location};</span>
+<span class="fc" id="L336">            db.delete(USER_LOC_MAP, &quot;USERID = ? AND LOC_NAME = ?&quot;, whereArgs);</span>
+        }
+<span class="fc" id="L338">        db.close();</span>
+<span class="fc" id="L339">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span>Generated by the Android Gradle plugin 7.4.2</div></body></html>
