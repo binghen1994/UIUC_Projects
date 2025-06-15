@@ -40,16 +40,6 @@ To enable the features of the Keyworld web application, we have utilized the fol
 ## Extra-Credit Capabilities
 1. Multi page application access by links of resources
 2. Some function of the Keyworld web application like "similar keyword" utilizes multiple databases(for example use the query result from MySql as input to Neo4J) along with new algorithms to improve performance. 
-## Contributions
-Yixiao Wei:
-
-
-Yulu Wang (25h): 
-1. implementation of relational widgets using Neo4J.
-2. Documentation 
-3. 
-             
-
 
 ### Database modifications
 There is a book with id 2147483647(which is INT_MAX) with 5000+ authors and 28000+ keywords.
